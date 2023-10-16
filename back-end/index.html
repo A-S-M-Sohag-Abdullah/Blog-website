@@ -1,23 +1,72 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
+    <title>Create Blog Post</title>
 </head>
 <body>
+    <h1>Create a Blog Post</h1>
+    <form action="http://localhost:8000/saveblog" method="POST" enctype="multipart/form-data">
+        <!-- Blog Title -->
+        <label for="title">Title:</label>
+        <input type="text" id="title" name="title" required><br><br>
+        
+        <!-- Cover Image -->
+        <label for="coverImage">Cover Image Title:</label>
+        <input type="text" id="coverImageTitle" name="coverImage[imageTitle]" required> <br> <br>
+        <label for="coverImageUrl">Cover Image</label>
+        <input type="file" id="coverImageUrl" name="cover" required><br><br>
+        
+        <!-- Descriptions -->
+        <div id="descriptions">
+            <div class="description">
+                <label for="description1">Description:</label>
+                <input type="text" id="description1" name="descriptions[0][description]"> <br><br>
+                <label for="descriptionImageTitle1">Description Image Title:</label>
+                <input type="text" id="descriptionImageTitle1" name="descriptions[0][descriptionImage][imageTitle]"><br><br>
+                <label for="descriptionImageUrl1">Description Image :</label>
+                <input type="file" id="descriptionImageUrl1" name="descriptionImage">
+                <br><br>
 
-  <form action="http://localhost:8000/deleteblog/65277c8ddfe24f4fdde0836a" method="post" enctype="multipart/form-data">
-   <!--  <input type="text" name="title">
-    <br><br>
-    <input type="text" name="descriptions">
-    <br><br>
+                <label for="descriptionvideoUrl1">Description Video URL:</label>
+                <input type="text" id="descriptionvideoUrl1" name="descriptions[0][videoUrl]"><br><br>
+            </div>
+        </div>
+        
+        <!-- Add More Descriptions Button -->
+        <button type="button" id="addDescription">Add Description</button>
+        
 
-    <input type="file" name="cover" > -->
+        
+        <!-- Submit Button -->
+        <input type="submit" value="Create Blog Post">
+    </form>
 
+    <script>
+        // JavaScript to handle adding more description fields
+        let descriptionCount = 1;
+        const descriptionsDiv = document.getElementById('descriptions');
+        const addDescriptionButton = document.getElementById('addDescription');
 
-    <input type="submit" value="submit">
-  </form>
-  
+        addDescriptionButton.addEventListener('click', () => {
+            const newDescriptionDiv = document.createElement('div');
+            newDescriptionDiv.className = 'description';
+
+            newDescriptionDiv.innerHTML = `
+                <label for="description${descriptionCount}">Description:</label>
+                <input type="text" id="description${descriptionCount}" name="descriptions[${descriptionCount}][description]"> <br><br>
+                <label for="descriptionImageTitle${descriptionCount}">Description Image Title:</label>
+                <input type="text" id="descriptionImageTitle${descriptionCount}" name="descriptions[${descriptionCount}][descriptionImage][imageTitle]"> <br><br>
+                <label for="descriptionImageUrl${descriptionCount}">Description Image:</label>
+                <input type="file" id="descriptionImageUrl${descriptionCount}" name="descriptionImage">
+                <br><br>
+
+                <label for="descriptionvideoUrl${descriptionCount}">Description Video URL:</label>
+                <input type="text" id="descriptionvideoUrl${descriptionCount}" name="descriptions[${descriptionCount}][videoUrl]"> <br><br>
+            `;
+
+            descriptionsDiv.appendChild(newDescriptionDiv);
+            descriptionCount++;
+        });
+    </script>
 </body>
 </html>

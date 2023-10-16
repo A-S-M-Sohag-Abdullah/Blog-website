@@ -21,12 +21,30 @@ const storage = multer.diskStorage({
     cb(null, "./public/images");
   },
   filename: function (req, file, cb) {
+    //console.log("line no 24 - ", req.body.descriptions);
     const d = new Date();
     let time = d.getTime();
     const uniqueSuffix = time;
-    req.body.imageurl =
-      file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname);
-    cb(null, req.body.imageurl);
+    try {
+      if (file.fieldname === "cover") {
+        req.body.coverImage.imageurl =
+          file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname);
+        cb(null, req.body.coverImage.imageurl);
+      } else if (file.fieldname === "descriptionImage") {
+        req.body.descriptions[
+          req.body.descriptions.length - 1
+        ].descriptionImage.imageurl =
+          file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname);
+
+        cb(
+          null,
+          req.body.descriptions[req.body.descriptions.length - 1]
+            .descriptionImage.imageurl
+        );
+      }
+    } catch (err) {
+      console.log(err.message);
+    }
   },
 });
 dotenv.config();
@@ -49,32 +67,26 @@ app.get("/", (req, res) => {
     .send("home");
 });
 
-app.get('/blog/:id', async (req,res)=>{
-  const id =  req.params.id;
-
-  try{
-    const data = await blogCollection.findOne({_id:id});
-    console.log(data);
-    res.status(200).json(data);
-  }
-  catch(err){
-    console.log(err.message);
-  }
-})
-
-app.post("/saveblog", upload.single("cover"), async (req, res) => {
-  const title = req.body.title;
-  const imageurl = req.body.imageurl;
-  const descriptions = req.body.descriptions;
-
-  console.log(req.body, req.file);
+app.get("/blog/:id", async (req, res) => {
+  const id = req.params.id;
 
   try {
-    const data = new blogCollection({
-      title,
-      imageurl,
-      descriptions,
-    });
+    const data = await blogCollection.findOne({ _id: id });
+    console.log(data);
+    res.status(200).json(data);
+  } catch (err) {
+    console.log(err.message);
+  }
+});
+
+const cpUpload = upload.fields([
+  { name: "cover", maxCount: 1 },
+  { name: "descriptionImage", maxCount: 8 },
+]);
+
+app.post("/saveblog", cpUpload, async (req, res) => {
+  try {
+    const data = new blogCollection(req.body);
 
     const blog = await data.save();
     console.log(blog._id);
@@ -148,7 +160,6 @@ app.post("/deleteblog/:id", async (req, res) => {
     console.log(err.message);
   }
 });
-
 
 app.listen(port, () => {
   console.log(`Application started on port ${port}`);
