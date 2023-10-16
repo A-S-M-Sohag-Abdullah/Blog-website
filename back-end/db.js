@@ -17,7 +17,7 @@ mongoose
     console.log("failed");
   });
 
-const blogSchema = new mongoose.Schema({
+/* const blogSchema = new mongoose.Schema({
   title: {
     type: String,
     required: true,
@@ -31,10 +31,44 @@ const blogSchema = new mongoose.Schema({
       type: String,
     },
   ],
-  date : {
-    type : Date,
-    default : new Date()
+  date: {
+    type: Date,
+    default: new Date(),
+  },
+}); */
+
+const imageSchema = new mongoose.Schema({
+  imageTitle:{
+    type:String,
+    required: true
+  },
+  imageurl:{
+    type:String,
+    required:true
   }
+});
+
+const blogSchema = new mongoose.Schema({
+  title: {
+    type: String,
+    required: true,
+  },
+  coverImage: imageSchema,
+  descriptions: [
+    {
+      description: {
+        type: String,
+      },
+      descriptionImage: imageSchema,
+      videoUrl: {
+        type: String,
+      }
+    },
+  ],
+  date: {
+    type: Date,
+    default: new Date(),
+  },
 });
 
 const blogCollection = new mongoose.model("blog", blogSchema);
