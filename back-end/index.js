@@ -49,6 +49,19 @@ app.get("/", (req, res) => {
     .send("home");
 });
 
+app.get('/blog/:id', async (req,res)=>{
+  const id =  req.params.id;
+
+  try{
+    const data = await blogCollection.findOne({_id:id});
+    console.log(data);
+    res.status(200).json(data);
+  }
+  catch(err){
+    console.log(err.message);
+  }
+})
+
 app.post("/saveblog", upload.single("cover"), async (req, res) => {
   const title = req.body.title;
   const imageurl = req.body.imageurl;
@@ -71,22 +84,23 @@ app.post("/saveblog", upload.single("cover"), async (req, res) => {
   }
 });
 
+//put method
 app.post("/updateblog/:id", upload.single("cover"), async (req, res) => {
   const id = req.params.id;
   let updatedData = req.body;
   try {
     const oldDocument = await blogCollection.findOne({ _id: id });
-    console.log("assssss" + oldDocument.imageurl);
+    //console.log("assssss" + oldDocument.imageurl);
 
     console.log(req.file, req.body);
     if (!req.file) req.body.imageurl = oldDocument.imageurl;
-    else{
-      fs.unlink(`./public/images/${oldDocument.imageurl}`, (err => { 
-        if (err) console.log(err); 
-        else { 
-          console.log("\nprevious file deleted"); 
-        } 
-      })); 
+    else {
+      fs.unlink(`./public/images/${oldDocument.imageurl}`, (err) => {
+        if (err) console.log(err);
+        else {
+          console.log("\nprevious file deleted");
+        }
+      });
     }
     updatedData = req.body;
     // res.send(oldDocument);
@@ -112,16 +126,29 @@ app.post("/updateblog/:id", upload.single("cover"), async (req, res) => {
   }
 });
 
-app.delete("/deleteblog/:id", async (req, res) => {
+//delete method
+app.post("/deleteblog/:id", async (req, res) => {
+  const id = req.params.id;
+
   try {
-    const result = await blogCollection.deleteOne({ _id: req.params.id });
-    console.log("Document deleted successfully");
-    console.log(result);
-    res.send(result);
+    const oldDocument = await blogCollection.findOne({ _id: id });
+    const oldImage = `./public/images/${oldDocument.imageurl}`;
+
+    fs.unlink(oldImage, (err) => {
+      if (err) console.log(err);
+      else {
+        console.log("\nprevious file deleted");
+      }
+    });
+
+    const deletedDocument = await blogCollection.findOneAndDelete({ _id: id });
+    console.log(deletedDocument);
+    res.send(true);
   } catch (err) {
-    console.error(err);
+    console.log(err.message);
   }
 });
+
 
 app.listen(port, () => {
   console.log(`Application started on port ${port}`);
