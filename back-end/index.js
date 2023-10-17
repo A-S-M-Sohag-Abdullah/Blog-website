@@ -59,12 +59,22 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "public")));
 
+//get methods
 app.get("/", (req, res) => {
   res
     .cookie("name", "sohag", {
       httpOnly: true,
     })
     .send("home");
+});
+
+app.get("/blog", async (req, res) => {
+  try {
+    data = await blogCollection.find().limit(2);
+    res.send(data);
+  } catch (err) {
+    console.log(err.message);
+  }
 });
 
 app.get("/blog/:id", async (req, res) => {
@@ -84,10 +94,10 @@ const cpUpload = upload.fields([
   { name: "descriptionImage", maxCount: 8 },
 ]);
 
+//post method
 app.post("/saveblog", cpUpload, async (req, res) => {
   try {
     const data = new blogCollection(req.body);
-
     const blog = await data.save();
     console.log(blog._id);
     res.send(blog._id);

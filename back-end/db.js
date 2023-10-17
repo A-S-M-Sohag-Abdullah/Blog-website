@@ -38,14 +38,12 @@ mongoose
 }); */
 
 const imageSchema = new mongoose.Schema({
-  imageTitle:{
-    type:String,
-    required: true
+  imageTitle: {
+    type: String,
   },
-  imageurl:{
-    type:String,
-    required:true
-  }
+  imageurl: {
+    type: String,
+  },
 });
 
 const blogSchema = new mongoose.Schema({
@@ -53,16 +51,18 @@ const blogSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  coverImage: imageSchema,
+  coverImage: { type: imageSchema, required: true },
   descriptions: [
     {
       description: {
         type: String,
+        default: null,
       },
-      descriptionImage: imageSchema,
+      descriptionImage: { type: imageSchema, default: null },
       videoUrl: {
         type: String,
-      }
+        default: null,
+      },
     },
   ],
   date: {
