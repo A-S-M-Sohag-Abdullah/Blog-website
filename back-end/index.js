@@ -21,16 +21,19 @@ const storage = multer.diskStorage({
     cb(null, "./public/images");
   },
   filename: function (req, file, cb) {
-    //console.log("line no 24 - ", req.body.descriptions);
+    console.log("line no 24 - ", req.body);
     const d = new Date();
     let time = d.getTime();
     const uniqueSuffix = time;
     try {
-      if (file.fieldname === "cover") {
+      if (file.fieldname === "coverImage") {
         req.body.coverImage.imageurl =
           file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname);
-        cb(null, req.body.coverImage.imageurl);
+        //cb(null, req.body.coverImage.imageurl);
       } else if (file.fieldname === "descriptionImage") {
+        req.body.descriptions[
+          req.body.descriptions.length - 1
+        ].descriptionImage = {};
         req.body.descriptions[
           req.body.descriptions.length - 1
         ].descriptionImage.imageurl =
@@ -90,7 +93,7 @@ app.get("/blog/:id", async (req, res) => {
 });
 
 const cpUpload = upload.fields([
-  { name: "cover", maxCount: 1 },
+  { name: "coverImage", maxCount: 1 },
   { name: "descriptionImage", maxCount: 8 },
 ]);
 
@@ -107,7 +110,7 @@ app.post("/saveblog", cpUpload, async (req, res) => {
 });
 
 //put method
-app.post("/updateblog/:id", upload.single("cover"), async (req, res) => {
+app.post("/updateblog/:id", upload.single("coverImage"), async (req, res) => {
   const id = req.params.id;
   let updatedData = req.body;
   try {

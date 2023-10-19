@@ -1,10 +1,12 @@
 import './App.css';
-import Blog from './components/blog';
+/* import BlogContainer from './components/blogContainer'; */
+import CreateBlog from './components/createBlog';
 
 function App() {
   return (
-    <div className="App">
-      <h1><Blog></Blog></h1>
+    <div className="App container py-5">
+    {/*   <BlogContainer/> */}
+      <CreateBlog/>
     </div>
   );
 }

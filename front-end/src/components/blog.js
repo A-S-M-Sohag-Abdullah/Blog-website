@@ -19,19 +19,19 @@ function Blog() {
   },[]);
 
   return (
-    <div>
-      {coverImage && <img style={{ width: '50%' }} src={`http://localhost:8000/images/${coverImage}`} alt="" />}
-      <h1 className="blog-title">{title}</h1>
+    <div className="blog col-9">
+      {coverImage && <img className="w-100" style={{ height: '300px' }} src={`http://localhost:8000/images/${coverImage}`} alt="" />}
+      <h1 className="blog-title py-4">{title}</h1>
       {descriptions && descriptions.map((element) => (
         <div key={element._id}>
-          {element.descriptionImage.imageurl && <img style={{ width: '20%' }} src={`http://localhost:8000/images/${element.descriptionImage.imageurl}`} alt="" />}
+          {element.descriptionImage.imageurl && <img style={{ height: '300px' }} src={`http://localhost:8000/images/${element.descriptionImage.imageurl}`} alt="" className="d-block mx-auto w-50" />}
           {element.videoUrl && (
             <iframe
               src={`http://localhost:8000/images${element.videoUrl}`}
               title="description"
             ></iframe>
           )}
-          {element.description && <p className="desc">{element.description}</p>}
+          {element.description && <p className="desc py-3">{element.description}</p>}
         </div>
       ))}
     </div>
