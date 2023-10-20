@@ -5,14 +5,14 @@ function CreateBlog() {
   const [title, setTitle] = useState("");
   const [coverImageTitle, setCoverImageTitle] = useState("");
   const [coverImage, setCoverImage] = useState(null);
-  const [descriptions, setDescriptions] = useState([{ description: "" }]);
+  const [descriptions, setDescriptions] = useState([{ description: ""}]);
   const [descriptionImage, setDescriptionImage] = useState([]);
 
   const addProperty = (i, property) => {
     const newDescriptions = descriptions.map((item, itemIndex) => {
       if (i !== itemIndex) return item;
       else {
-        item[property] = "";
+        item[property] = null;
         console.log(descriptions);
         return item;
       }
@@ -52,12 +52,14 @@ function CreateBlog() {
     e.preventDefault();
    
     const formData = new FormData();
+    console.log(descriptions);
     formData.append('title', title);
     formData.append('coverImage[imageTitle]', coverImageTitle);
-    formData.append('descriptions', descriptions);
+    const myDescriptions = JSON.stringify(descriptions)
+    formData.append('descriptions', myDescriptions);
     formData.append('coverImage', coverImage);
     formData.append('descriptionImage', descriptionImage);
-    console.log(formData.entries());
+    
     const data = await axios.post('http://localhost:8000/saveblog', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',

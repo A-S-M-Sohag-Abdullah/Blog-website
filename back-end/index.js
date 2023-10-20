@@ -21,19 +21,23 @@ const storage = multer.diskStorage({
     cb(null, "./public/images");
   },
   filename: function (req, file, cb) {
-    console.log("line no 24 - ", req.body);
+    req.body.descriptions = JSON.parse(req.body.descriptions);
+    console.log("line no 24 - ", req.body.descriptions);
     const d = new Date();
     let time = d.getTime();
     const uniqueSuffix = time;
     try {
       if (file.fieldname === "coverImage") {
+        /* req.body.descriptions[
+          req.body.descriptions.length - 1
+        ].descriptionImage = {}; */
         req.body.coverImage.imageurl =
           file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname);
-        //cb(null, req.body.coverImage.imageurl);
+        cb(null, req.body.coverImage.imageurl);
       } else if (file.fieldname === "descriptionImage") {
-        req.body.descriptions[
+      /*   req.body.descriptions[
           req.body.descriptions.length - 1
-        ].descriptionImage = {};
+        ].descriptionImage = {}; */
         req.body.descriptions[
           req.body.descriptions.length - 1
         ].descriptionImage.imageurl =
