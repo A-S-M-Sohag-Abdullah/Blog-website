@@ -5,8 +5,8 @@ function CreateBlog() {
   const [title, setTitle] = useState("");
   const [coverImageTitle, setCoverImageTitle] = useState("");
   const [coverImage, setCoverImage] = useState(null);
-  const [descriptions, setDescriptions] = useState([{ description: ""}]);
-  const [descriptionImage, setDescriptionImage] = useState([]);
+  const [descriptions, setDescriptions] = useState([{ description: "" }]);
+  const [descriptionImages, setDescriptionImages] = useState([]);
 
   const addProperty = (i, property) => {
     const newDescriptions = descriptions.map((item, itemIndex) => {
@@ -43,30 +43,65 @@ function CreateBlog() {
     setDescriptions(newDescriptions);
   };
 
+  const handleDescriptionImageTitle = (value,i)=>{
+    const newDescriptions = descriptions.map((item, itemIndex) => {
+      if (i !== itemIndex) return item;
+      else {
+        item.descriptionImage = {};
+        item.descriptionImage['imageTitle'] = value;
+        //console.log(item);
+        return item;
+      }
+    });
+    setDescriptions(newDescriptions);
+  }
+
   const handleDescriptionImage = (files) => {
-    const newDescriptionImage = [...descriptionImage, files];
-    setDescriptionImage(newDescriptionImage);
+    const newDescriptionImage = [...descriptionImages, files];
+    setDescriptionImages(newDescriptionImage);
   };
 
-  const handleBlogSubmit = async (e)=>{
+  const handleBlogSubmit = async (e) => {
     e.preventDefault();
-   
+
     const formData = new FormData();
     console.log(descriptions);
-    formData.append('title', title);
-    formData.append('coverImage[imageTitle]', coverImageTitle);
-    const myDescriptions = JSON.stringify(descriptions)
-    formData.append('descriptions', myDescriptions);
-    formData.append('coverImage', coverImage);
-    formData.append('descriptionImage', descriptionImage);
-    
-    const data = await axios.post('http://localhost:8000/saveblog', formData, {
+    formData.append("title", title);
+    formData.append("coverImage[imageTitle]", coverImageTitle);
+    const myDescriptions = JSON.stringify(descriptions);
+    formData.append("descriptions", myDescriptions);
+    /* descriptions.forEach((item, i) => {
+      formData.append(`descriptions[${i}][description]`, item.description);
+  
+      if (item.hasOwnProperty("descriptionImage")) {
+        formData.append(`descriptions[${i}][descriptionImage][imageTitle]`, "");
+        formData.append(
+          `descriptions[${i}][descriptionImage][imageurl]`,
+          item.descriptionImage
+        );
+      }
+  
+      if (item.hasOwnProperty("videoUrl")) {
+        formData.append(`descriptions[${i}][videoUrl]`, item.videoUrl);
+      }
+    }); */
+    formData.append("coverImage", coverImage);
+    /*  for (let i = 0; i < descriptionImage.length; i++) {
+      console.log(descriptionImage[i]);
+      formData.append('descriptionImage', descriptionImage[i]);
+    } */
+    descriptionImages.forEach((image, i) => {
+      formData.append(`descriptionImage`, image);
+    });
+    //const newdescriptionImage = JSON.parse(descriptionImage);
+
+    const data = await axios.post("http://localhost:8000/saveblog", formData, {
       headers: {
-        'Content-Type': 'multipart/form-data',
+        "Content-Type": "multipart/form-data",
       },
     });
     console.log(data);
-  }
+  };
 
   return (
     <div>
@@ -190,10 +225,20 @@ function CreateBlog() {
               {item.hasOwnProperty("descriptionImage") && (
                 <div>
                   <input
+                    type="text"
+                    placeholder="Image title"
+                    onChange={(e) => {
+                      handleDescriptionImageTitle(
+                        e.target.value,
+                        i
+                      );
+                    }}
+                  />
+                  <input
                     type="file"
                     name="coverImage"
                     onChange={(e) => {
-                      handleDescriptionImage(e.target.files);
+                      handleDescriptionImage(e.target.files[0]);
                     }}
                   />
                   <button

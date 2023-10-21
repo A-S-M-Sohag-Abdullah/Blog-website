@@ -18,26 +18,35 @@ const fs = require("fs");
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "./public/images");
+    try {
+      console.log('line 24' + typeof req.body.descriptions );
+      console.log(req.body);
+      //const descriptions = req.body.descriptions;
+      if (typeof req.body.descriptions !== 'object'){
+        req.body.descriptions = JSON.parse(req.body.descriptions);
+      }
+        
+      /* console.log(isValidJSON(req.body.descriptions)); */
+      console.log('line 30' + typeof req.body.descriptions );
+      console.log(req.body);
+
+      //console.log(file);
+      cb(null, "./public/images");
+    } catch (err) {
+      console.log("asdasd" + err);
+    }
   },
   filename: function (req, file, cb) {
-    req.body.descriptions = JSON.parse(req.body.descriptions);
-    console.log("line no 24 - ", req.body.descriptions);
     const d = new Date();
     let time = d.getTime();
     const uniqueSuffix = time;
     try {
-      if (file.fieldname === "coverImage") {
-        /* req.body.descriptions[
-          req.body.descriptions.length - 1
-        ].descriptionImage = {}; */
+      
+      if (file.fieldname === "coverImage") {        
         req.body.coverImage.imageurl =
           file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname);
         cb(null, req.body.coverImage.imageurl);
       } else if (file.fieldname === "descriptionImage") {
-      /*   req.body.descriptions[
-          req.body.descriptions.length - 1
-        ].descriptionImage = {}; */
         req.body.descriptions[
           req.body.descriptions.length - 1
         ].descriptionImage.imageurl =
@@ -50,7 +59,7 @@ const storage = multer.diskStorage({
         );
       }
     } catch (err) {
-      console.log(err.message);
+      console.log("dddd" + err.message);
     }
   },
 });
@@ -104,6 +113,7 @@ const cpUpload = upload.fields([
 //post method
 app.post("/saveblog", cpUpload, async (req, res) => {
   try {
+    console.log(req.body);
     const data = new blogCollection(req.body);
     const blog = await data.save();
     console.log(blog._id);
