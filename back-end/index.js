@@ -13,22 +13,25 @@ const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const dotenv = require("dotenv");
 const { blogCollection } = require("./db");
+const { preprocess } = require("./utils/preprocess");
 const multer = require("multer");
 const fs = require("fs");
 
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     try {
-      console.log('line 24' + typeof req.body.descriptions );
+      console.log("line 23");
       console.log(req.body);
       //const descriptions = req.body.descriptions;
-      if (typeof req.body.descriptions !== 'object'){
+      if (typeof req.body.descriptions !== "object") {
         req.body.descriptions = JSON.parse(req.body.descriptions);
       }
-        
+      if (!Array.isArray(req.body.descImgPosArr))
+        req.body.descImgPosArr = req.body.descImgPosArr.split(",");
+
       /* console.log(isValidJSON(req.body.descriptions)); */
-      console.log('line 30' + typeof req.body.descriptions );
-      console.log(req.body);
+      //console.log('line 30' + typeof req.body.descriptions );
+      //console.log(req.body);
 
       //console.log(file);
       cb(null, "./public/images");
@@ -41,25 +44,29 @@ const storage = multer.diskStorage({
     let time = d.getTime();
     const uniqueSuffix = time;
     try {
-      
-      if (file.fieldname === "coverImage") {        
-        req.body.coverImage.imageurl =
-          file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname);
-        cb(null, req.body.coverImage.imageurl);
-      } else if (file.fieldname === "descriptionImage") {
-        req.body.descriptions[
-          req.body.descriptions.length - 1
-        ].descriptionImage.imageurl =
-          file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname);
+      const filename =
+        file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname);
 
-        cb(
-          null,
-          req.body.descriptions[req.body.descriptions.length - 1]
+      if (file.fieldname === "coverImage") {
+        req.body.coverImage.imageurl = filename;
+      } else if (file.fieldname === "descriptionImage") {
+        if (
+          !req.body.descriptions[parseInt(req.body.descImgPosArr[0])]
             .descriptionImage.imageurl
-        );
+        ) {
+          req.body.descriptions[
+            parseInt(req.body.descImgPosArr[0])
+          ].descriptionImage.imageurl = filename;
+          console.log(
+            req.body.descriptions[parseInt(req.body.descImgPosArr[0])]
+              .descriptionImage.imageurl
+          );
+          req.body.descImgPosArr.shift();
+        }
       }
+      cb(null, filename);
     } catch (err) {
-      console.log("dddd" + err.message);
+      console.log("file saving error" + err.message);
     }
   },
 });
@@ -109,11 +116,17 @@ const cpUpload = upload.fields([
   { name: "coverImage", maxCount: 1 },
   { name: "descriptionImage", maxCount: 8 },
 ]);
+/* function preprocess(req,res,next){
+  if (typeof req.body.descriptions !== "object") {
+    req.body.descriptions = JSON.parse(req.body.descriptions);
+  }
+  req.body.descImgPosArr =   req.body.descImgPosArr.split(',').map(Number);
 
+  next();
+} */
 //post method
 app.post("/saveblog", cpUpload, async (req, res) => {
   try {
-    console.log(req.body);
     const data = new blogCollection(req.body);
     const blog = await data.save();
     console.log(blog._id);

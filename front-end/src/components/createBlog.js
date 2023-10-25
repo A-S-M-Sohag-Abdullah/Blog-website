@@ -8,6 +8,8 @@ function CreateBlog() {
   const [descriptions, setDescriptions] = useState([{ description: "" }]);
   const [descriptionImages, setDescriptionImages] = useState([]);
 
+  const [descImgPosArr, setDescImgPosArr] = useState([]);
+
   const addProperty = (i, property) => {
     const newDescriptions = descriptions.map((item, itemIndex) => {
       if (i !== itemIndex) return item;
@@ -43,22 +45,26 @@ function CreateBlog() {
     setDescriptions(newDescriptions);
   };
 
-  const handleDescriptionImageTitle = (value,i)=>{
+  const handleDescriptionImageTitle = (value, i) => {
     const newDescriptions = descriptions.map((item, itemIndex) => {
       if (i !== itemIndex) return item;
       else {
         item.descriptionImage = {};
-        item.descriptionImage['imageTitle'] = value;
+        item.descriptionImage["imageTitle"] = value;
         //console.log(item);
         return item;
       }
     });
     setDescriptions(newDescriptions);
-  }
+  };
 
-  const handleDescriptionImage = (files) => {
-    const newDescriptionImage = [...descriptionImages, files];
-    setDescriptionImages(newDescriptionImage);
+  const handleDescriptionImage = (files, i) => {
+    if (files) {
+      const newDescriptionImage = [...descriptionImages, files];
+      setDescriptionImages(newDescriptionImage);
+      if (descImgPosArr.indexOf(i) == -1)
+        setDescImgPosArr([...descImgPosArr, i]);
+    } else return;
   };
 
   const handleBlogSubmit = async (e) => {
@@ -70,31 +76,13 @@ function CreateBlog() {
     formData.append("coverImage[imageTitle]", coverImageTitle);
     const myDescriptions = JSON.stringify(descriptions);
     formData.append("descriptions", myDescriptions);
-    /* descriptions.forEach((item, i) => {
-      formData.append(`descriptions[${i}][description]`, item.description);
-  
-      if (item.hasOwnProperty("descriptionImage")) {
-        formData.append(`descriptions[${i}][descriptionImage][imageTitle]`, "");
-        formData.append(
-          `descriptions[${i}][descriptionImage][imageurl]`,
-          item.descriptionImage
-        );
-      }
-  
-      if (item.hasOwnProperty("videoUrl")) {
-        formData.append(`descriptions[${i}][videoUrl]`, item.videoUrl);
-      }
-    }); */
+
+    formData.append("descImgPosArr", descImgPosArr);
+
     formData.append("coverImage", coverImage);
-    /*  for (let i = 0; i < descriptionImage.length; i++) {
-      console.log(descriptionImage[i]);
-      formData.append('descriptionImage', descriptionImage[i]);
-    } */
     descriptionImages.forEach((image, i) => {
       formData.append(`descriptionImage`, image);
     });
-    //const newdescriptionImage = JSON.parse(descriptionImage);
-
     const data = await axios.post("http://localhost:8000/saveblog", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
@@ -228,17 +216,14 @@ function CreateBlog() {
                     type="text"
                     placeholder="Image title"
                     onChange={(e) => {
-                      handleDescriptionImageTitle(
-                        e.target.value,
-                        i
-                      );
+                      handleDescriptionImageTitle(e.target.value, i);
                     }}
                   />
                   <input
                     type="file"
                     name="coverImage"
                     onChange={(e) => {
-                      handleDescriptionImage(e.target.files[0]);
+                      handleDescriptionImage(e.target.files[0], i);
                     }}
                   />
                   <button
@@ -293,6 +278,17 @@ function CreateBlog() {
           );
         })}
 
+        {/* Add more section */}
+        <div>
+          <button
+            onClick={(e) => {
+              e.preventDefault();
+              setDescriptions([...descriptions, {}]);
+            }}
+          >
+            Add section
+          </button>
+        </div>
         {/* Submit Button */}
         <input type="submit" value="Create Blog Post" />
       </form>
