@@ -1,5 +1,8 @@
 import axios from "axios";
-import React, { useState } from "react";
+import React, { createContext, useRef, useState } from "react";
+import Dragdrop from "./dragdrop";
+
+const DragDropContext = createContext();
 
 function CreateBlog() {
   const [title, setTitle] = useState("");
@@ -7,6 +10,11 @@ function CreateBlog() {
   const [coverImage, setCoverImage] = useState(null);
   const [descriptions, setDescriptions] = useState([{ description: "" }]);
   const [descriptionImages, setDescriptionImages] = useState([]);
+
+  const fileInputRef = useRef(null);
+  const setFileInputRef = (file) => {
+    fileInputRef.current.files = file;
+  };
 
   const [descImgPosArr, setDescImgPosArr] = useState([]);
 
@@ -62,7 +70,7 @@ function CreateBlog() {
     if (files) {
       const newDescriptionImage = [...descriptionImages, files];
       setDescriptionImages(newDescriptionImage);
-      if (descImgPosArr.indexOf(i) == -1)
+      if (descImgPosArr.indexOf(i) === -1)
         setDescImgPosArr([...descImgPosArr, i]);
     } else return;
   };
@@ -79,6 +87,7 @@ function CreateBlog() {
 
     formData.append("descImgPosArr", descImgPosArr);
 
+    console.log(coverImage);
     formData.append("coverImage", coverImage);
     descriptionImages.forEach((image, i) => {
       formData.append(`descriptionImage`, image);
@@ -130,17 +139,22 @@ function CreateBlog() {
         />
         <br />
         <br />
-        <label htmlFor="coverImage">Cover Image:</label>
-        <input
-          type="file"
-          id="coverImageUrl"
-          name="coverImage"
-          onChange={(e) => {
-            setCoverImage(e.target.files[0]);
-          }}
-          required
-        />
-
+        <label htmlFor="coverImage">
+          Cover Image:
+          <Dragdrop>
+            <input
+              type="file"
+              id="coverImage"
+              name="coverImage"
+            
+              onChange={(e) => {
+                console.log('cover image e click krse');
+                setCoverImage(e.target.files[0]);
+              }}
+              required
+            />
+          </Dragdrop>
+        </label>
         <br />
         <br />
 
@@ -297,3 +311,4 @@ function CreateBlog() {
 }
 
 export default CreateBlog;
+export { DragDropContext };
