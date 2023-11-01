@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { createContext, useRef, useState } from "react";
+import React, { createContext, useState } from "react";
 import Dragdrop from "./dragdrop";
 
 const DragDropContext = createContext();
@@ -9,12 +9,7 @@ function CreateBlog() {
   const [coverImageTitle, setCoverImageTitle] = useState("");
   const [coverImage, setCoverImage] = useState(null);
   const [descriptions, setDescriptions] = useState([{ description: "" }]);
-  const [descriptionImages, setDescriptionImages] = useState([]);
-
-  const fileInputRef = useRef(null);
-  const setFileInputRef = (file) => {
-    fileInputRef.current.files = file;
-  };
+  const [descriptionImages, setDescriptionImages] = useState([null]);
 
   const [descImgPosArr, setDescImgPosArr] = useState([]);
 
@@ -23,7 +18,7 @@ function CreateBlog() {
       if (i !== itemIndex) return item;
       else {
         item[property] = null;
-        console.log(descriptions);
+        /* console.log(descriptions); */
         return item;
       }
     });
@@ -68,18 +63,33 @@ function CreateBlog() {
 
   const handleDescriptionImage = (files, i) => {
     if (files) {
-      const newDescriptionImage = [...descriptionImages, files];
-      setDescriptionImages(newDescriptionImage);
-      if (descImgPosArr.indexOf(i) === -1)
+      /* console.log("ekhane asce"); */
+     /*  console.log(files);
+      console.log(i); */
+
+      if (descImgPosArr.indexOf(i) === -1) {
+        const newDescriptionImage = descriptionImages.map((item, itemIndex) => {
+          if (i !== itemIndex) return item;
+          else {
+            item = files;
+            return item;
+          }
+        });
+
+        setDescriptionImages(newDescriptionImage);
         setDescImgPosArr([...descImgPosArr, i]);
+        console.log(descImgPosArr);
+      /*   setDescImgPosArr(descImgPosArr.sort());
+        console.log(descImgPosArr); */
+      }
     } else return;
   };
 
   const handleBlogSubmit = async (e) => {
     e.preventDefault();
-
+    if (!coverImage) alert("cover image deo");
     const formData = new FormData();
-    console.log(descriptions);
+    /* console.log(descriptions); */
     formData.append("title", title);
     formData.append("coverImage[imageTitle]", coverImageTitle);
     const myDescriptions = JSON.stringify(descriptions);
@@ -87,7 +97,7 @@ function CreateBlog() {
 
     formData.append("descImgPosArr", descImgPosArr);
 
-    console.log(coverImage);
+    /* console.log(coverImage); */
     formData.append("coverImage", coverImage);
     descriptionImages.forEach((image, i) => {
       formData.append(`descriptionImage`, image);
@@ -97,7 +107,7 @@ function CreateBlog() {
         "Content-Type": "multipart/form-data",
       },
     });
-    console.log(data);
+    /* console.log(data); */
   };
 
   return (
@@ -141,17 +151,19 @@ function CreateBlog() {
         <br />
         <label htmlFor="coverImage">
           Cover Image:
-          <Dragdrop>
+          <Dragdrop
+            coverImageProperty={{ image: coverImage, setImage: setCoverImage }}
+            descriptionImageProperty={{}}
+          >
             <input
               type="file"
               id="coverImage"
               name="coverImage"
-            
               onChange={(e) => {
-                console.log('cover image e click krse');
                 setCoverImage(e.target.files[0]);
+                /* console.log(coverImage); */
               }}
-              required
+              hidden
             />
           </Dragdrop>
         </label>
@@ -232,14 +244,28 @@ function CreateBlog() {
                     onChange={(e) => {
                       handleDescriptionImageTitle(e.target.value, i);
                     }}
+                    required
                   />
-                  <input
-                    type="file"
-                    name="coverImage"
-                    onChange={(e) => {
-                      handleDescriptionImage(e.target.files[0], i);
-                    }}
-                  />
+                  <label htmlFor={`descriptionImage${i}`}>
+                    <Dragdrop
+                      coverImageProperty={{}}
+                      descriptionImageProperty={{
+                        image: descriptionImages[i],
+                        handleDescriptionImage: handleDescriptionImage,
+                        i: i,
+                      }}
+                    >
+                      <input
+                        id={`descriptionImage${i}`}
+                        type="file"
+                        name="coverImage"
+                        onChange={(e) => {
+                          handleDescriptionImage(e.target.files[0], i);
+                        }}
+                      />
+                    </Dragdrop>
+                  </label>
+
                   <button
                     onClick={(e) => {
                       e.preventDefault();
@@ -298,6 +324,7 @@ function CreateBlog() {
             onClick={(e) => {
               e.preventDefault();
               setDescriptions([...descriptions, {}]);
+              setDescriptionImages([...descriptionImages,null])
             }}
           >
             Add section

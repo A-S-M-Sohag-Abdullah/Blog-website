@@ -1,10 +1,13 @@
-import React, { useContext, useRef, useState } from "react";
-import { DragDropContext } from "./createBlog";
+import React, { useState } from "react";
 
-function Dragdrop({ children }) {
+function Dragdrop({ coverImageProperty, descriptionImageProperty, children }) {
+  const image = coverImageProperty.image || descriptionImageProperty.image;
+  const setImage = coverImageProperty.setImage || null;
+  const handleDescriptionImage = descriptionImageProperty.handleDescriptionImage || null;
+  const i = descriptionImageProperty.i || null;
+
   const [isDragging, setIsDragging] = useState(false);
   const [droppedImage, setDroppedImage] = useState(null);
-  const inputRef = useRef(null);
 
   const handleDragEnter = (e) => {
     e.preventDefault();
@@ -18,6 +21,7 @@ function Dragdrop({ children }) {
 
   const handleDragOver = (e) => {
     e.preventDefault();
+    setIsDragging(true);
   };
 
   const handleDrop = (e) => {
@@ -25,20 +29,25 @@ function Dragdrop({ children }) {
     setIsDragging(false);
 
     const files = Array.from(e.dataTransfer.files);
-    console.log("Dropped files:", files);
+    /* console.log("Dropped files:", files); */
     if (files.length > 0) {
-      const image = files[0];
-      setDroppedImage(URL.createObjectURL(image));
+      const imageDropped = files[0];
+      console.log(imageDropped);
+
+      if (coverImageProperty.setImage) {
+        setImage(imageDropped);
+        console.log(image);
+      }else if(descriptionImageProperty.handleDescriptionImage){
+        /* console.log('ekhaneo asce'); */
+        handleDescriptionImage(imageDropped,descriptionImageProperty.i);
+      }
+
+      console.log(handleDescriptionImage);
+      console.log( descriptionImageProperty.i);
+      setDroppedImage(URL.createObjectURL(imageDropped));
     }
   };
 
-  const handleButtonClick = (e) => {
-    // Trigger the click event on the input element
-    e.preventDefault();
-    if (inputRef.current) {
-      inputRef.current.click();
-    }
-  };
   return (
     <div>
       <div
@@ -48,8 +57,8 @@ function Dragdrop({ children }) {
         onDragOver={handleDragOver}
         onDrop={handleDrop}
       >
-        {droppedImage ? (
-          <img src={droppedImage} alt="Dropped" />
+        {image ? (
+          <img src={URL.createObjectURL(image)} alt="Dropped" />
         ) : isDragging ? (
           <span>Drop picture here</span>
         ) : (
@@ -59,9 +68,7 @@ function Dragdrop({ children }) {
         )}
       </div>
 
-      {React.cloneElement(children, { ref: inputRef })}
-
-      <button onClick={(e) => handleButtonClick(e)}>Upload File</button>
+      {children}
     </div>
   );
 }

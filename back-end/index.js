@@ -49,6 +49,7 @@ const storage = multer.diskStorage({
 
       if (file.fieldname === "coverImage") {
         req.body.coverImage.imageurl = filename;
+        req.body.descImgPosArr = req.body.descImgPosArr.sort();
       } else if (file.fieldname === "descriptionImage") {
         if (
           !req.body.descriptions[parseInt(req.body.descImgPosArr[0])]
