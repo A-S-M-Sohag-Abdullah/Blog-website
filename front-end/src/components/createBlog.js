@@ -1,6 +1,7 @@
 import axios from "axios";
 import React, { createContext, useState } from "react";
 import Dragdrop from "./dragdrop";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 const DragDropContext = createContext();
 
@@ -64,7 +65,7 @@ function CreateBlog() {
   const handleDescriptionImage = (files, i) => {
     if (files) {
       /* console.log("ekhane asce"); */
-     /*  console.log(files);
+      /*  console.log(files);
       console.log(i); */
 
       if (descImgPosArr.indexOf(i) === -1) {
@@ -79,11 +80,32 @@ function CreateBlog() {
         setDescriptionImages(newDescriptionImage);
         setDescImgPosArr([...descImgPosArr, i]);
         console.log(descImgPosArr);
-      /*   setDescImgPosArr(descImgPosArr.sort());
+        /*   setDescImgPosArr(descImgPosArr.sort());
         console.log(descImgPosArr); */
+      }else if(descImgPosArr.indexOf(i) >= -1){
+        const newDescriptionImage = descriptionImages.map((item, itemIndex) => {
+          if (i !== itemIndex) return item;
+          else {
+            item = files;
+            return item;
+          }
+        });
+        setDescriptionImages(newDescriptionImage);
       }
     } else return;
   };
+
+  const removeDescriptionImage = (indextoRemove) =>{
+    const filteredDescriptionImages = descriptionImages.map((item,index) => {
+      if(index === indextoRemove){
+        item = null;
+      }else item = item;
+      return item;
+    });
+    const filteredDescImgPosArr = descImgPosArr.filter((item) => item !== indextoRemove);
+    setDescriptionImages(filteredDescriptionImages);
+    setDescImgPosArr(filteredDescImgPosArr);
+  }
 
   const handleBlogSubmit = async (e) => {
     e.preventDefault();
@@ -111,45 +133,17 @@ function CreateBlog() {
   };
 
   return (
-    <div>
-      <h1>Create a Blog Post</h1>
+    <div className="blog-create-container">
+      <h1 className="text-center">Create a Blog Post</h1>
       <form
         onSubmit={(e) => {
           handleBlogSubmit(e);
         }}
         method="POST"
         encType="multipart/form-data"
+        className="blog-create-form"
       >
-        {/* Blog Title */}
-        <label htmlFor="title">Title:</label>
-        <input
-          type="text"
-          id="title"
-          name="title"
-          onChange={(e) => {
-            setTitle(e.target.value);
-          }}
-          required
-          value={title}
-        />
-        <br />
-        <br />
-
-        {/* Cover Image */}
-        <label htmlFor="coverImageTitle">Cover Image Title:</label>
-        <input
-          type="text"
-          id="coverImageTitle"
-          name="coverImage[imageTitle]"
-          onChange={(e) => {
-            setCoverImageTitle(e.target.value);
-          }}
-          required
-          value={coverImageTitle}
-        />
-        <br />
-        <br />
-        <label htmlFor="coverImage">
+        <label htmlFor="coverImage" className="cover-image">
           Cover Image:
           <Dragdrop
             coverImageProperty={{ image: coverImage, setImage: setCoverImage }}
@@ -167,153 +161,205 @@ function CreateBlog() {
             />
           </Dragdrop>
         </label>
+        {/* Cover Image */}
+        <input
+          type="text"
+          id="coverImageTitle"
+          name="coverImage[imageTitle]"
+          placeholder="cover image title"
+          onChange={(e) => {
+            setCoverImageTitle(e.target.value);
+          }}
+          required
+          value={coverImageTitle}
+          className="image-title my-2"
+        />
+        <br />
+
+        <br />
+        {/* Blog Title */}
+        <input
+          type="text"
+          id="title"
+          name="title"
+          className="blog-title-input"
+          placeholder="Give your blog a title"
+          onChange={(e) => {
+            setTitle(e.target.value);
+          }}
+          required
+          value={title}
+        />
+        <br />
+        <br />
+
         <br />
         <br />
 
         {descriptions.map((item, i) => {
           return (
             <div id="descriptions" key={i}>
+
+              {i !==0 && (
+                <button className="btn-section-remove d-block ms-auto p-2">
+                  Remove section
+                </button>
+              )}
+
               {i === 0 && (
-                <input
-                  type="text"
+                <textarea
                   placeholder="Description"
                   value={item.description}
                   onChange={(e) => {
                     handleDescriptionsChange(e.target.value, i, "description");
                   }}
+                  className="blog-description-input"
                 />
               )}
-              <br />
-              {i !== 0 && item.hasOwnProperty("description") && (
-                <div>
-                  <input
-                    type="text"
-                    placeholder="Description"
-                    value={item.description}
-                    onChange={(e) => {
-                      handleDescriptionsChange(
-                        e.target.value,
-                        i,
-                        "description"
-                      );
-                    }}
-                  />
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      removeProperty(i, "description");
-                    }}
-                  >
-                    Remove description
-                  </button>
-                </div>
-              )}
 
-              {i !== 0 && !item.hasOwnProperty("description") && (
-                <div>
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      addProperty(i, "description");
-                    }}
-                  >
-                    add description
-                  </button>
-                </div>
-              )}
-              <br />
-
-              {!item.hasOwnProperty("descriptionImage") && (
-                <div>
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      addProperty(i, "descriptionImage");
-                    }}
-                  >
-                    add Image
-                  </button>
-                </div>
-              )}
-
-              {item.hasOwnProperty("descriptionImage") && (
-                <div>
-                  <input
-                    type="text"
-                    placeholder="Image title"
-                    onChange={(e) => {
-                      handleDescriptionImageTitle(e.target.value, i);
-                    }}
-                    required
-                  />
-                  <label htmlFor={`descriptionImage${i}`}>
-                    <Dragdrop
-                      coverImageProperty={{}}
-                      descriptionImageProperty={{
-                        image: descriptionImages[i],
-                        handleDescriptionImage: handleDescriptionImage,
-                        i: i,
+              {/* description image section*/}
+              <div className="my-3">
+                {!item.hasOwnProperty("descriptionImage") && (
+                  <div>
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        addProperty(i, "descriptionImage");
                       }}
+                      className="add-btn"
                     >
-                      <input
-                        id={`descriptionImage${i}`}
-                        type="file"
-                        name="coverImage"
-                        onChange={(e) => {
-                          handleDescriptionImage(e.target.files[0], i);
+                      add Image
+                    </button>
+                  </div>
+                )}
+
+                {item.hasOwnProperty("descriptionImage") && (
+                  <div className="description-image my-3">
+                    <label htmlFor={`descriptionImage${i}`} className="w-100">
+                      <Dragdrop
+                        coverImageProperty={{}}
+                        descriptionImageProperty={{
+                          image: descriptionImages[i],
+                          handleDescriptionImage: handleDescriptionImage,
+                          i: i,
                         }}
-                      />
-                    </Dragdrop>
-                  </label>
+                      >
+                        <input
+                          id={`descriptionImage${i}`}
+                          type="file"
+                          name="coverImage"
+                          onChange={(e) => {
+                            handleDescriptionImage(e.target.files[0], i);
+                          }}
+                          hidden
+                        />
+                      </Dragdrop>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Image title"
+                      onChange={(e) => {
+                        handleDescriptionImageTitle(e.target.value, i);
+                      }}
+                      required
+                      className="image-title my-2"
+                    />
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        removeDescriptionImage(i);
+                        removeProperty(i, "descriptionImage");
+                      }}
+                      className="remove-btn"
+                    >
+                      Remove Image
+                    </button>
+                  </div>
+                )}
+              </div>
 
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      removeProperty(i, "descriptionImage");
-                    }}
-                  >
-                    Remove Image
-                  </button>
-                </div>
-              )}
+              {/* description section */}
+              <div className="my-4">
+                {i !== 0 && item.hasOwnProperty("description") && (
+                  <div>
+                    <textarea
+                      placeholder="Description"
+                      value={item.description}
+                      onChange={(e) => {
+                        handleDescriptionsChange(
+                          e.target.value,
+                          i,
+                          "description"
+                        );
+                      }}
+                      className="blog-description-input mb-3"
+                    />
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        removeProperty(i, "description");
+                      }}
+                      className="remove-btn d-block ms-auto"
+                    >
+                      Remove description
+                    </button>
+                  </div>
+                )}
 
-              <br />
+                {i !== 0 && !item.hasOwnProperty("description") && (
+                  <div>
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        addProperty(i, "description");
+                      }}
+                      className="add-btn"
+                    >
+                      add description
+                    </button>
+                  </div>
+                )}
+              </div>
 
-              {!item.hasOwnProperty("videoUrl") && (
-                <div>
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      addProperty(i, "videoUrl");
-                    }}
-                  >
-                    add video
-                  </button>
-                </div>
-              )}
+              {/* video section */}
+              <div className="my-3">
+                {!item.hasOwnProperty("videoUrl") && (
+                  <div>
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        addProperty(i, "videoUrl");
+                      }}
+                      className="add-btn"
+                    >
+                      add video
+                    </button>
+                  </div>
+                )}
 
-              {item.hasOwnProperty("videoUrl") && (
-                <div>
-                  <input
-                    type="text"
-                    placeholder="videourl"
-                    value={item.videoUrl}
-                    onChange={(e) => {
-                      handleDescriptionsChange(e.target.value, i, "videoUrl");
-                    }}
-                  />
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      removeProperty(i, "videoUrl");
-                    }}
-                  >
-                    remove video
-                  </button>
-                </div>
-              )}
-
-              <br />
+                {item.hasOwnProperty("videoUrl") && (
+                  <div className="d-flex justify-content-between align-items-center">
+                    <input
+                      type="text"
+                      placeholder="videourl"
+                      value={item.videoUrl}
+                      onChange={(e) => {
+                        handleDescriptionsChange(e.target.value, i, "videoUrl");
+                      }}
+                      className="video-url-input"
+                    />
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        removeProperty(i, "videoUrl");
+                      }}
+                      className="remove-btn"
+                    >
+                      Remove video
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           );
         })}
@@ -324,14 +370,15 @@ function CreateBlog() {
             onClick={(e) => {
               e.preventDefault();
               setDescriptions([...descriptions, {}]);
-              setDescriptionImages([...descriptionImages,null])
+              setDescriptionImages([...descriptionImages, null]);
             }}
+            className="add-section-btn"
           >
             Add section
           </button>
         </div>
         {/* Submit Button */}
-        <input type="submit" value="Create Blog Post" />
+        <input type="submit" value="Create Blog Post" className="submit-blog"/>
       </form>
     </div>
   );
