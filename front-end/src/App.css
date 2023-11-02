@@ -125,7 +125,7 @@
   font-size: 18px;
 }
 
-.submit-blog{
+.submit-blog {
   display: block;
   margin: 20px auto;
   background-color: #2ecc71;
@@ -139,7 +139,7 @@
   font-weight: 600;
 }
 
-.btn-section-remove{
+.btn-section-remove {
   color: red;
   border: 1px solid red;
   border-radius: 5px;

@@ -18,7 +18,13 @@ function CreateBlog() {
     const newDescriptions = descriptions.map((item, itemIndex) => {
       if (i !== itemIndex) return item;
       else {
-        item[property] = null;
+        
+        if (property !== "descriptionImage") {
+          item[property] = "";
+        }else{
+          item[property] = {};
+          item[property]["imageTitle"] = "";
+        }
         /* console.log(descriptions); */
         return item;
       }
@@ -79,10 +85,10 @@ function CreateBlog() {
 
         setDescriptionImages(newDescriptionImage);
         setDescImgPosArr([...descImgPosArr, i]);
-        console.log(descImgPosArr);
+        /* console.log(descImgPosArr); */
         /*   setDescImgPosArr(descImgPosArr.sort());
         console.log(descImgPosArr); */
-      }else if(descImgPosArr.indexOf(i) >= -1){
+      } else if (descImgPosArr.indexOf(i) >= -1) {
         const newDescriptionImage = descriptionImages.map((item, itemIndex) => {
           if (i !== itemIndex) return item;
           else {
@@ -95,17 +101,19 @@ function CreateBlog() {
     } else return;
   };
 
-  const removeDescriptionImage = (indextoRemove) =>{
-    const filteredDescriptionImages = descriptionImages.map((item,index) => {
-      if(index === indextoRemove){
+  const removeDescriptionImage = (indextoRemove) => {
+    const filteredDescriptionImages = descriptionImages.map((item, index) => {
+      if (index === indextoRemove) {
         item = null;
-      }else item = item;
+      } else item = item;
       return item;
     });
-    const filteredDescImgPosArr = descImgPosArr.filter((item) => item !== indextoRemove);
+    const filteredDescImgPosArr = descImgPosArr.filter(
+      (item) => item !== indextoRemove
+    );
     setDescriptionImages(filteredDescriptionImages);
     setDescImgPosArr(filteredDescImgPosArr);
-  }
+  };
 
   const handleBlogSubmit = async (e) => {
     e.preventDefault();
@@ -130,6 +138,23 @@ function CreateBlog() {
       },
     });
     /* console.log(data); */
+  };
+
+  const removeSection = (indexToRemove) => {
+    const filteredDescriptions = descriptions.filter(
+      (item, index) => index !== indexToRemove
+    );
+    setDescriptions(filteredDescriptions);
+
+    const filteredDescriptionImages = descriptionImages.filter(
+      (item, index) => index !== indexToRemove
+    );
+    setDescriptionImages(filteredDescriptionImages);
+    const filteredDescImgPosArr = descImgPosArr.map((item) => {
+      if (item >= indexToRemove) item--;
+      return item;
+    });
+    setDescImgPosArr(filteredDescImgPosArr);
   };
 
   return (
@@ -199,9 +224,14 @@ function CreateBlog() {
         {descriptions.map((item, i) => {
           return (
             <div id="descriptions" key={i}>
-
-              {i !==0 && (
-                <button className="btn-section-remove d-block ms-auto p-2">
+              {i !== 0 && (
+                <button
+                  className="btn-section-remove d-block ms-auto p-2"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    removeSection(i);
+                  }}
+                >
                   Remove section
                 </button>
               )}
@@ -257,6 +287,7 @@ function CreateBlog() {
                     </label>
                     <input
                       type="text"
+                      value={item.descriptionImage.imageTitle}
                       placeholder="Image title"
                       onChange={(e) => {
                         handleDescriptionImageTitle(e.target.value, i);
@@ -378,7 +409,7 @@ function CreateBlog() {
           </button>
         </div>
         {/* Submit Button */}
-        <input type="submit" value="Create Blog Post" className="submit-blog"/>
+        <input type="submit" value="Create Blog Post" className="submit-blog" />
       </form>
     </div>
   );
