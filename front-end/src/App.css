@@ -1,3 +1,7 @@
+/*************
+Create blog
+****************/
+
 .blog-create-container {
   background-color: aliceblue;
 }
@@ -144,4 +148,30 @@
   border: 1px solid red;
   border-radius: 5px;
   font-weight: 500;
+}
+
+/***************
+render blog
+**************/
+
+.description-box{
+  width: 100%;
+}
+.descrtiption{
+  width: 100%;
+  margin-bottom: 35px;
+  font-size: 18px;
+}
+.image-name{
+  margin-top: 5px;
+  font-style: italic;
+  margin-bottom: 0;
+  font-size: 12px;
+  text-align: center;
+  text-transform: capitalize;
+}
+
+.description-image{
+  width: 450px;
+  margin: 15px auto;
 }
