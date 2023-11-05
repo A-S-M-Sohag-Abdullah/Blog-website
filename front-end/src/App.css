@@ -175,3 +175,43 @@ render blog
   width: 450px;
   margin: 15px auto;
 }
+
+.blog-box {
+  padding: 20px;
+  margin: 10px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+  background-color: #fff;
+  transition: transform 0.2s;
+  border-radius: 5px;
+}
+
+.blog-box:hover {
+  transform: scale(1.02);
+}
+
+.blog-box img {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.blog-box h4 {
+  font-size: 24px;
+  margin: 10px 0;
+  color: #333;
+}
+
+.blog-box p {
+  font-size: 16px;
+  color: #666;
+}
+
+.blog-box p:first-of-type {
+  margin: 10px 0;
+}
+
+.blog-box p:last-of-type {
+  color: #999;
+  font-weight: bold;
+}

@@ -94,7 +94,7 @@ app.get("/", (req, res) => {
 
 app.get("/blog", async (req, res) => {
   try {
-    data = await blogCollection.find().limit(2);
+    data = await blogCollection.find();
     res.send(data);
   } catch (err) {
     console.log(err.message);
