@@ -9,7 +9,7 @@ function Blog() {
   useEffect(() => {
     (async () => {
       const blog = await axios.get(
-        "http://localhost:8000/blog/654495e4e5c84cc9ef30e42c"
+        "http://localhost:8000/blog/6549e28f755b0126ed83e821"
       );
       console.log(blog.data);
       setCoverImage(blog.data.coverImage);

@@ -13,11 +13,11 @@ function Blogs() {
 
   return (
     <div className="container">
-      <div className="row">
+      <div className="row g-1">
       {blogs.map((item, index) => {
         return (
           
-            <div className="col-lg-4 col-6">
+            <div className="col-lg-4 col-6" key={item._id}>
               <div className="blog-box">
                 <div className="">
                   <img

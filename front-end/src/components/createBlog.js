@@ -1,27 +1,28 @@
 import axios from "axios";
-import React, { createContext, useState } from "react";
+import React, { createContext, useEffect, useState } from "react";
 import Dragdrop from "./dragdrop";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 const DragDropContext = createContext();
 
 function CreateBlog() {
+  const [isUpdating, setIsUpdating] = useState(true);
+
+  // form post data
   const [title, setTitle] = useState("");
   const [coverImageTitle, setCoverImageTitle] = useState("");
   const [coverImage, setCoverImage] = useState(null);
   const [descriptions, setDescriptions] = useState([{ description: "" }]);
   const [descriptionImages, setDescriptionImages] = useState([null]);
-
   const [descImgPosArr, setDescImgPosArr] = useState([]);
 
   const addProperty = (i, property) => {
     const newDescriptions = descriptions.map((item, itemIndex) => {
       if (i !== itemIndex) return item;
       else {
-        
         if (property !== "descriptionImage") {
           item[property] = "";
-        }else{
+        } else {
           item[property] = {};
           item[property]["imageTitle"] = "";
         }
@@ -157,6 +158,63 @@ function CreateBlog() {
     setDescImgPosArr(filteredDescImgPosArr);
   };
 
+  useEffect(() => {
+    if (isUpdating)
+      (async () => {
+        const blog = await axios.get(
+          "http://localhost:8000/blog/654495e4e5c84cc9ef30e42c"
+        );
+        /* console.log(blog.data.coverImage.imageurl); */
+        const imageUrl = `http://localhost:8000/images/${blog.data.coverImage.imageurl}`;
+        const response = await fetch(imageUrl);
+        const blob = await response.blob();
+        const file = new File([blob], "image.jpg", { type: "image/jpeg" });
+        setTitle(blog.data.title);
+        setCoverImage(file);
+        setCoverImageTitle(blog.data.coverImage.imageTitle);
+
+        const oldDescriptions = blog.data.descriptions.map((item, index) => {
+          return item;
+        });
+        setDescriptionImages([]);
+        setDescriptions(oldDescriptions);
+        /* oldDescriptions.map(
+          async (item, index) => {
+            if (item.descriptionImage !== null) {
+              const imageUrl = `http://localhost:8000/images/${item.descriptionImage.imageurl}`;
+              console.log(imageUrl);
+              const response = await fetch(imageUrl);
+              const blob = await response.blob();
+              const file = new File([blob], "image.jpg", {
+                type: "image/jpeg",
+              });
+              setDescriptionImages([...descriptionImages,file]);
+            }else{
+              setDescriptionImages([...descriptionImages,null]);
+            }
+          }
+        ); */
+        const updatedImages = await Promise.all(
+          oldDescriptions.map(async (item, index) => {
+            if (item.descriptionImage !== null) {
+              const imageUrl = `http://localhost:8000/images/${item.descriptionImage.imageurl}`;
+              console.log(imageUrl);
+              const response = await fetch(imageUrl);
+              const blob = await response.blob();
+              const file = new File([blob], "image.jpg", {
+                type: "image/jpeg",
+              });
+              return file;
+            } else {
+              return null;
+            }
+          })
+        );
+        setDescriptionImages(updatedImages);
+        console.log(descriptionImages);
+      })();
+  }, []);
+
   return (
     <div className="blog-create-container">
       <h1 className="text-center">Create a Blog Post</h1>
@@ -237,14 +295,20 @@ function CreateBlog() {
               )}
 
               {i === 0 && (
-                <textarea
-                  placeholder="Description"
-                  value={item.description}
-                  onChange={(e) => {
-                    handleDescriptionsChange(e.target.value, i, "description");
+                <span
+                  role="textbox"
+                  contentEditable
+                  onInput={(e) => {
+                    handleDescriptionsChange(
+                      e.currentTarget.textContent,
+                      i,
+                      "description"
+                    );
                   }}
-                  className="blog-description-input"
-                />
+                  className="blog-description-input mb-3"
+                >
+                  {item.description}
+                </span>
               )}
 
               {/* description image section*/}
@@ -263,57 +327,73 @@ function CreateBlog() {
                   </div>
                 )}
 
-                {item.hasOwnProperty("descriptionImage") && (
-                  <div className="description-image my-3">
-                    <label htmlFor={`descriptionImage${i}`} className="w-100">
-                      <Dragdrop
-                        coverImageProperty={{}}
-                        descriptionImageProperty={{
-                          image: descriptionImages[i],
-                          handleDescriptionImage: handleDescriptionImage,
-                          i: i,
-                        }}
-                      >
-                        <input
-                          id={`descriptionImage${i}`}
-                          type="file"
-                          name="coverImage"
-                          onChange={(e) => {
-                            handleDescriptionImage(e.target.files[0], i);
+                {item.hasOwnProperty("descriptionImage") &&
+                  item.descriptionImage !== null && (
+                    <div className="description-image my-3">
+                      <label htmlFor={`descriptionImage${i}`} className="w-100">
+                        <Dragdrop
+                          coverImageProperty={{}}
+                          descriptionImageProperty={{
+                            image: descriptionImages[i],
+                            handleDescriptionImage: handleDescriptionImage,
+                            i: i,
                           }}
-                          hidden
-                        />
-                      </Dragdrop>
-                    </label>
-                    <input
-                      type="text"
-                      value={item.descriptionImage.imageTitle}
-                      placeholder="Image title"
-                      onChange={(e) => {
-                        handleDescriptionImageTitle(e.target.value, i);
-                      }}
-                      required
-                      className="image-title my-2"
-                    />
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        removeDescriptionImage(i);
-                        removeProperty(i, "descriptionImage");
-                      }}
-                      className="remove-btn"
-                    >
-                      Remove Image
-                    </button>
-                  </div>
-                )}
+                        >
+                          <input
+                            id={`descriptionImage${i}`}
+                            type="file"
+                            name="coverImage"
+                            onChange={(e) => {
+                              handleDescriptionImage(e.target.files[0], i);
+                            }}
+                            hidden
+                          />
+                        </Dragdrop>
+                      </label>
+                      <input
+                        type="text"
+                        value={item.descriptionImage.imageTitle}
+                        placeholder="Image title"
+                        onChange={(e) => {
+                          handleDescriptionImageTitle(e.target.value, i);
+                        }}
+                        required
+                        className="image-title my-2"
+                      />
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          removeDescriptionImage(i);
+                          removeProperty(i, "descriptionImage");
+                        }}
+                        className="remove-btn"
+                      >
+                        Remove Image
+                      </button>
+                    </div>
+                  )}
               </div>
 
               {/* description section */}
               <div className="my-4">
                 {i !== 0 && item.hasOwnProperty("description") && (
                   <div>
-                    <textarea
+                    <span
+                      role="textbox"
+                      contentEditable
+                      onInput={(e) => {
+                        handleDescriptionsChange(
+                          e.currentTarget.textContent,
+                          i,
+                          "description"
+                        );
+                      }}
+                      className="blog-description-input mb-3"
+                    >
+                      {item.description}
+                    </span>
+
+                    {/* <textarea
                       placeholder="Description"
                       value={item.description}
                       onChange={(e) => {
@@ -324,7 +404,7 @@ function CreateBlog() {
                         );
                       }}
                       className="blog-description-input mb-3"
-                    />
+                    /> */}
                     <button
                       onClick={(e) => {
                         e.preventDefault();
@@ -354,7 +434,8 @@ function CreateBlog() {
 
               {/* video section */}
               <div className="my-3">
-                {!item.hasOwnProperty("videoUrl") && (
+                {(!item.hasOwnProperty("videoUrl") ||
+                  item.videoUrl == null) && (
                   <div>
                     <button
                       onClick={(e) => {
@@ -368,7 +449,7 @@ function CreateBlog() {
                   </div>
                 )}
 
-                {item.hasOwnProperty("videoUrl") && (
+                {item.hasOwnProperty("videoUrl") && item.videoUrl !== null && (
                   <div className="d-flex justify-content-between align-items-center">
                     <input
                       type="text"

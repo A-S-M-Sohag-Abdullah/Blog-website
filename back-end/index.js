@@ -106,7 +106,7 @@ app.get("/blog/:id", async (req, res) => {
 
   try {
     const data = await blogCollection.findOne({ _id: id });
-    console.log(data);
+    /* console.log(data); */
     res.status(200).json(data);
   } catch (err) {
     console.log(err.message);
