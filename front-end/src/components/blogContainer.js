@@ -1,6 +1,6 @@
 import React from "react";
 import Blog from "./blog";
-import 'bootstrap/dist/css/bootstrap.min.css';
+/* import 'bootstrap/dist/css/bootstrap.min.css'; */
 
 function BlogContainer() {
   return (

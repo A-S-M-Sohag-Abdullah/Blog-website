@@ -1,12 +1,26 @@
 import axios from "axios";
-import React, { createContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import Dragdrop from "./dragdrop";
-import "bootstrap/dist/css/bootstrap.min.css";
+/* import "bootstrap/dist/css/bootstrap.min.css"; */
+import { useNavigate, useParams } from "react-router-dom";
+import PublicBlogContext from "../contexts/publicBlogContext";
 
 const DragDropContext = createContext();
 
 function CreateBlog() {
-  const [isUpdating, setIsUpdating] = useState(true);
+  const categories = [
+    "Technology",
+    "Health",
+    "Finance",
+    "Education",
+    "Entertainment",
+  ];
+
+  const { getBlogs } = useContext(PublicBlogContext);
+  const [selectedCategory, setSelectedCategory] = useState(categories[0]);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const params = useParams();
+  const navigate = useNavigate();
 
   // form post data
   const [title, setTitle] = useState("");
@@ -15,6 +29,9 @@ function CreateBlog() {
   const [descriptions, setDescriptions] = useState([{ description: "" }]);
   const [descriptionImages, setDescriptionImages] = useState([null]);
   const [descImgPosArr, setDescImgPosArr] = useState([]);
+
+  //old image urls for update purpose
+  const [oldImageUrls, setOldImageUrls] = useState([]);
 
   const addProperty = (i, property) => {
     const newDescriptions = descriptions.map((item, itemIndex) => {
@@ -44,7 +61,12 @@ function CreateBlog() {
     setDescriptions(newDescriptions);
   };
 
+  const handleCategoryChange = (event) => {
+    setSelectedCategory(event.target.value);
+  };
+
   const handleDescriptionsChange = (value, i, fieldname) => {
+    console.log(value);
     const newDescriptions = descriptions.map((item, itemIndex) => {
       if (i !== itemIndex) return item;
       else {
@@ -70,11 +92,13 @@ function CreateBlog() {
   };
 
   const handleDescriptionImage = (files, i) => {
+    //console.log("ekhen asce");
     if (files) {
       /* console.log("ekhane asce"); */
-      /*  console.log(files);
-      console.log(i); */
 
+      //console.log(i);
+      files.order = i;
+      //console.log(files);
       if (descImgPosArr.indexOf(i) === -1) {
         const newDescriptionImage = descriptionImages.map((item, itemIndex) => {
           if (i !== itemIndex) return item;
@@ -97,6 +121,7 @@ function CreateBlog() {
             return item;
           }
         });
+        //console.log(descriptionImages);
         setDescriptionImages(newDescriptionImage);
       }
     } else return;
@@ -116,31 +141,6 @@ function CreateBlog() {
     setDescImgPosArr(filteredDescImgPosArr);
   };
 
-  const handleBlogSubmit = async (e) => {
-    e.preventDefault();
-    if (!coverImage) alert("cover image deo");
-    const formData = new FormData();
-    /* console.log(descriptions); */
-    formData.append("title", title);
-    formData.append("coverImage[imageTitle]", coverImageTitle);
-    const myDescriptions = JSON.stringify(descriptions);
-    formData.append("descriptions", myDescriptions);
-
-    formData.append("descImgPosArr", descImgPosArr);
-
-    /* console.log(coverImage); */
-    formData.append("coverImage", coverImage);
-    descriptionImages.forEach((image, i) => {
-      formData.append(`descriptionImage`, image);
-    });
-    const data = await axios.post("http://localhost:8000/saveblog", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    });
-    /* console.log(data); */
-  };
-
   const removeSection = (indexToRemove) => {
     const filteredDescriptions = descriptions.filter(
       (item, index) => index !== indexToRemove
@@ -151,69 +151,130 @@ function CreateBlog() {
       (item, index) => index !== indexToRemove
     );
     setDescriptionImages(filteredDescriptionImages);
-    const filteredDescImgPosArr = descImgPosArr.map((item) => {
-      if (item >= indexToRemove) item--;
-      return item;
-    });
+    const filteredDescImgPosArr = descImgPosArr
+      .filter((item) => item !== indexToRemove)
+      .map((item) => {
+        if (item >= indexToRemove) item--;
+        return item;
+      });
+    console.log(filteredDescImgPosArr);
     setDescImgPosArr(filteredDescImgPosArr);
   };
 
+  const handleBlogSubmit = async (e) => {
+    //console.log(descriptionImages);
+    e.preventDefault();
+    if (!coverImage) alert("cover image deo");
+    const formData = new FormData();
+
+    const myDescriptions = JSON.stringify(descriptions);
+    //console.log(myDescriptions);
+
+    formData.append("category", selectedCategory);
+    formData.append("title", title);
+    formData.append("coverImage[imageTitle]", coverImageTitle);
+    formData.append("descriptions", myDescriptions);
+    formData.append("descImgPosArr", descImgPosArr);
+    formData.append("coverImage", coverImage);
+
+    descriptionImages.forEach((image, i) => {
+      formData.append(`descriptionImage${i}`, image);
+    });
+    //console.log(descriptionImages);
+    //console.log(formData);
+
+    if (isUpdating) formData.append("oldImageUrls", oldImageUrls);
+
+    let requestString = isUpdating
+      ? `http://localhost:8000/updateblog/${params.id}`
+      : "http://localhost:8000/upload";
+    const data = await axios.post(requestString, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    console.log(data);
+    if (params.id) navigate(`/blogs/${params.id}`);
+    else {
+      navigate(`/blogs/${data.data._id}`);
+    }
+
+    getBlogs();
+  };
+
   useEffect(() => {
+    if (params.id) setIsUpdating(true);
+    else setIsUpdating(false);
     if (isUpdating)
       (async () => {
-        const blog = await axios.get(
-          "http://localhost:8000/blog/654495e4e5c84cc9ef30e42c"
-        );
-        /* console.log(blog.data.coverImage.imageurl); */
+        const blog = await axios.get(`http://localhost:8000/blog/${params.id}`);
+
         const imageUrl = `http://localhost:8000/images/${blog.data.coverImage.imageurl}`;
         const response = await fetch(imageUrl);
+        //console.log(response);
         const blob = await response.blob();
-        const file = new File([blob], "image.jpg", { type: "image/jpeg" });
+        const file = new File([blob], response.url, { type: "image/jpeg" });
         setTitle(blog.data.title);
         setCoverImage(file);
         setCoverImageTitle(blog.data.coverImage.imageTitle);
-
+        setSelectedCategory(blog.data.category);
         const oldDescriptions = blog.data.descriptions.map((item, index) => {
           return item;
         });
+        console.log(oldDescriptions);
         setDescriptionImages([]);
         setDescriptions(oldDescriptions);
-        /* oldDescriptions.map(
-          async (item, index) => {
-            if (item.descriptionImage !== null) {
-              const imageUrl = `http://localhost:8000/images/${item.descriptionImage.imageurl}`;
-              console.log(imageUrl);
-              const response = await fetch(imageUrl);
-              const blob = await response.blob();
-              const file = new File([blob], "image.jpg", {
-                type: "image/jpeg",
-              });
-              setDescriptionImages([...descriptionImages,file]);
-            }else{
-              setDescriptionImages([...descriptionImages,null]);
-            }
-          }
-        ); */
+        setDescImgPosArr([]);
         const updatedImages = await Promise.all(
           oldDescriptions.map(async (item, index) => {
             if (item.descriptionImage !== null) {
               const imageUrl = `http://localhost:8000/images/${item.descriptionImage.imageurl}`;
-              console.log(imageUrl);
+
               const response = await fetch(imageUrl);
+              //console.log(response);
+
               const blob = await response.blob();
-              const file = new File([blob], "image.jpg", {
+              const file = new File([blob], response.url, {
                 type: "image/jpeg",
               });
+
               return file;
             } else {
               return null;
             }
           })
         );
+        const oldPictureImgaeUrls = blog.data.descriptions
+          .map((item, index) => {
+            if (item.descriptionImage !== null)
+              return item.descriptionImage.imageurl;
+          })
+          .filter((item) => item !== undefined);
+        const oldDesImgPosArr = blog.data.descriptions
+          .map((item, index) => {
+            if (item.descriptionImage !== null) return index;
+          })
+          .filter((index) => index !== undefined);
+
+        //console.log(updatedImages);
+        setDescImgPosArr(oldDesImgPosArr);
+        setOldImageUrls(oldPictureImgaeUrls);
+        setOldImageUrls([
+          ...oldPictureImgaeUrls,
+          blog.data.coverImage.imageurl,
+        ]);
         setDescriptionImages(updatedImages);
-        console.log(descriptionImages);
       })();
-  }, []);
+    else {
+      setTitle("");
+      setCoverImageTitle("");
+      setCoverImage(null);
+      setDescriptions([{ description: "" }]);
+      setDescriptionImages([null]);
+      setDescImgPosArr([]);
+      setOldImageUrls([]);
+    }
+  }, [params.id, isUpdating]);
 
   return (
     <div className="blog-create-container">
@@ -226,6 +287,14 @@ function CreateBlog() {
         encType="multipart/form-data"
         className="blog-create-form"
       >
+        <select value={selectedCategory} onChange={handleCategoryChange}>
+          {categories.map((category, index) => (
+            <option key={index} value={category}>
+              {category}
+            </option>
+          ))}
+        </select>
+
         <label htmlFor="coverImage" className="cover-image">
           Cover Image:
           <Dragdrop
@@ -238,7 +307,6 @@ function CreateBlog() {
               name="coverImage"
               onChange={(e) => {
                 setCoverImage(e.target.files[0]);
-                /* console.log(coverImage); */
               }}
               hidden
             />
@@ -295,37 +363,41 @@ function CreateBlog() {
               )}
 
               {i === 0 && (
-                <span
-                  role="textbox"
-                  contentEditable
-                  onInput={(e) => {
-                    handleDescriptionsChange(
-                      e.currentTarget.textContent,
-                      i,
-                      "description"
-                    );
-                  }}
-                  className="blog-description-input mb-3"
-                >
-                  {item.description}
-                </span>
+                <div key={i}>
+                  <textarea
+                    onInput={(e) => {
+                      e.target.style.height = "auto";
+                      e.target.style.height = e.target.scrollHeight + "px";
+                    }}
+                    onChange={(e) => {
+                      handleDescriptionsChange(
+                        e.target.value,
+                        i,
+                        "description"
+                      );
+                    }}
+                    className="blog-description-input mb-3"
+                    value={item.description}
+                  ></textarea>
+                </div>
               )}
 
               {/* description image section*/}
               <div className="my-3">
-                {!item.hasOwnProperty("descriptionImage") && (
-                  <div>
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        addProperty(i, "descriptionImage");
-                      }}
-                      className="add-btn"
-                    >
-                      add Image
-                    </button>
-                  </div>
-                )}
+                {!item.hasOwnProperty("descriptionImage") &&
+                  item.descriptionImage == null && (
+                    <div>
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          addProperty(i, "descriptionImage");
+                        }}
+                        className="add-btn"
+                      >
+                        add Image
+                      </button>
+                    </div>
+                  )}
 
                 {item.hasOwnProperty("descriptionImage") &&
                   item.descriptionImage !== null && (
@@ -342,7 +414,7 @@ function CreateBlog() {
                           <input
                             id={`descriptionImage${i}`}
                             type="file"
-                            name="coverImage"
+                            name="descriptionImage"
                             onChange={(e) => {
                               handleDescriptionImage(e.target.files[0], i);
                             }}
@@ -378,20 +450,23 @@ function CreateBlog() {
               <div className="my-4">
                 {i !== 0 && item.hasOwnProperty("description") && (
                   <div>
-                    <span
-                      role="textbox"
-                      contentEditable
-                      onInput={(e) => {
-                        handleDescriptionsChange(
-                          e.currentTarget.textContent,
-                          i,
-                          "description"
-                        );
-                      }}
-                      className="blog-description-input mb-3"
-                    >
-                      {item.description}
-                    </span>
+                    <div key={i}>
+                      <textarea
+                        onInput={(e) => {
+                          e.target.style.height = "auto";
+                          e.target.style.height = e.target.scrollHeight + "px";
+                        }}
+                        onChange={(e) => {
+                          handleDescriptionsChange(
+                            e.target.value,
+                            i,
+                            "description"
+                          );
+                        }}
+                        className="blog-description-input mb-3"
+                        value={item.description}
+                      ></textarea>
+                    </div>
 
                     {/* <textarea
                       placeholder="Description"
@@ -489,8 +564,13 @@ function CreateBlog() {
             Add section
           </button>
         </div>
+
         {/* Submit Button */}
-        <input type="submit" value="Create Blog Post" className="submit-blog" />
+        <input
+          type="submit"
+          value={isUpdating ? "Save blog" : "Create Blog Post"}
+          className="submit-blog"
+        />
       </form>
     </div>
   );

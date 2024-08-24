@@ -17,25 +17,26 @@ mongoose
     console.log("failed");
   });
 
-/* const blogSchema = new mongoose.Schema({
-  title: {
+const bloggerSchema = new mongoose.Schema({
+  username: {
     type: String,
     required: true,
   },
-  imageurl: {
+  email: {
+    type: String,
+    unique: true,
+    required: true,
+    trim: true,
+  },
+  password: {
     type: String,
     required: true,
   },
-  descriptions: [
-    {
-      type: String,
-    },
-  ],
-  date: {
-    type: Date,
-    default: new Date(),
+  accountStatus: {
+    type: Boolean,
+    default: false,
   },
-}); */
+});
 
 const imageSchema = new mongoose.Schema({
   imageTitle: {
@@ -47,6 +48,18 @@ const imageSchema = new mongoose.Schema({
 });
 
 const blogSchema = new mongoose.Schema({
+  active: {
+    type: Boolean,
+    default: false,
+  },
+  email: {
+    type: String,
+    required: true,
+  },
+  category: {
+    type: String,
+    require: true,
+  },
   title: {
     type: String,
     required: true,
@@ -72,5 +85,6 @@ const blogSchema = new mongoose.Schema({
 });
 
 const blogCollection = new mongoose.model("blog", blogSchema);
+const blogerCollection = new mongoose.model("bloger", bloggerSchema);
 
-module.exports = { blogCollection };
+module.exports = { blogCollection, blogerCollection };

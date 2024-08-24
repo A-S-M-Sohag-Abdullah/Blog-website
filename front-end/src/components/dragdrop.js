@@ -43,7 +43,7 @@ function Dragdrop({ coverImageProperty, descriptionImageProperty, children }) {
       }
 
       console.log(handleDescriptionImage);
-      console.log( descriptionImageProperty.i);
+      console.log(descriptionImageProperty.i);
       setDroppedImage(URL.createObjectURL(imageDropped));
     }
   };

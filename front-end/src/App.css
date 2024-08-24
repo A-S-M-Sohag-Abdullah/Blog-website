@@ -62,6 +62,8 @@ Create blog
   height: auto;
   min-height: 100%;
   background: white;
+  resize: none;
+  overflow: visible;
 }
 
 #descriptions {
@@ -88,7 +90,13 @@ Create blog
   padding: 10px;
   border-radius: 10px;
 }
-
+.description-video {
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+}
 .remove-btn {
   background-color: red;
   border-radius: 5px;
@@ -158,15 +166,18 @@ Create blog
 render blog
 **************/
 
-.description-box{
+.description-box {
   width: 100%;
 }
-.descrtiption{
+.description-box p {
+  text-align: justify;
+}
+.descrtiption {
   width: 100%;
   margin-bottom: 35px;
   font-size: 18px;
 }
-.image-name{
+.image-name {
   margin-top: 5px;
   font-style: italic;
   margin-bottom: 0;
@@ -175,7 +186,7 @@ render blog
   text-transform: capitalize;
 }
 
-.description-image{
+.description-image {
   width: 450px;
   margin: 15px auto;
 }
@@ -204,12 +215,12 @@ render blog
 .blog-box h4 {
   font-size: 20px;
   margin: 10px 0;
-  color: #333;
+  color: #f05f57;
 }
 
 .blog-box p {
   font-size: 16px;
-  color: #666;
+  color: #f05f57;
 }
 
 .blog-box p:first-of-type {
@@ -217,6 +228,256 @@ render blog
 }
 
 .blog-box p:last-of-type {
-  color: #999;
+  color: #360940;
   font-weight: bold;
+}
+
+/***************
+Admin blog
+***************/
+.admin-blog-box {
+  padding: 10px;
+  margin-bottom: 15px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+  background-color: #fff;
+  transition: transform 0.2s;
+  border-radius: 5px;
+}
+.admin-blog-img {
+  width: 70px;
+}
+
+.admin-blog-title {
+  font-size: 18px;
+}
+
+.options {
+  justify-self: flex-end;
+}
+
+.options button {
+  background: transparent;
+  border: none;
+  outline: 0;
+}
+
+/*****************
+navbar css
+******************/
+.nav-bar {
+  width: 100%;
+  display: flex;
+  background-image: linear-gradient(135deg, #52e5e7 10%, #130cb7 100%);
+  background-image: linear-gradient(135deg, #f05f57 10%, #360940 100%);
+  color: white;
+  align-items: center;
+  padding: 0 2rem;
+}
+.links {
+  display: flex;
+  margin-left: auto;
+  list-style: none;
+  margin-bottom: 0;
+  align-items: center;
+}
+.logo {
+  font-weight: bold;
+}
+.nav-link {
+  padding: 10px !important;
+}
+.nav-link a {
+  text-decoration: none;
+  color: white;
+}
+.login-btn {
+  background-color: #5c8bf1;
+  background-image: linear-gradient(135deg, #f97794 10%, #623aa2 100%);
+  border-radius: 5px;
+  width: 25px;
+  font-weight: bold;
+  padding: 5px 10px;
+  font-size: 14px;
+}
+.signUp-btn {
+  background-color: white;
+  border-radius: 10px;
+  padding: 5px 10px;
+  color: black !important;
+  font-weight: 500;
+}
+.logout-btn {
+  background-color: transparent;
+  border: none;
+  outline: 0;
+  color: white !important;
+}
+.create-btn {
+  background-color: white;
+  display: inline-block;
+  padding: 5px;
+  border-radius: 10px;
+  color: black !important;
+  font-weight: 500;
+}
+/*****************
+side-bar blogs
+******************/
+.side-bar-blogs {
+  width: 100%;
+  padding: 20px;
+  margin: 10px;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+  background-color: #fff;
+  transition: transform 0.2s;
+  border-radius: 5px;
+}
+
+.side-bar-blogs:hover {
+  transform: scale(1.02);
+}
+
+/*****************
+login css
+******************/
+.login,
+.signup {
+  background-color: #74b9ff;
+  background-image: linear-gradient(135deg, #f761a1 10%, #8c1bab 100%);
+  border-radius: 10px;
+  padding: 25px;
+  margin: 100px auto;
+  width: calc(100% - 550px);
+}
+.login h1,
+.signup h1 {
+  text-align: center;
+  text-transform: uppercase;
+  color: rgb(255, 255, 255);
+}
+.login input,
+.signup input {
+  width: 100%;
+  border: none;
+  height: 50px;
+  border-radius: 10px;
+  outline: 0;
+  padding: 0 15px;
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.login button,
+.signup button {
+  margin: 0 auto;
+  display: block;
+  height: 50px;
+  width: 100px;
+
+  background-image: linear-gradient(135deg, #f05f57 10%, #360940 100%);
+  color: white;
+  outline: 0;
+  border: 0;
+  color: white;
+  font-size: 20px;
+  border-radius: 10px;
+}
+
+.latest-blog {
+  background-image: linear-gradient(135deg, #f05f57 10%, #360940 100%);
+}
+
+.latest-blog h4,
+.latest-blog p {
+  color: white !important;
+}
+
+.view-more-btn {
+  background-color: #e0455f;
+  background-image: linear-gradient(147deg, #e0455f 0%, #44000b 74%);
+  padding: 10px 0;
+  width: 250px !important;
+  border-radius: 30rem;
+  margin: 0 auto;
+  display: block;
+  color: white;
+  border: none;
+  outline: 0;
+  font-weight: bold;
+  margin-top: 15px;
+}
+
+.blog-container {
+  width: 100%;
+  margin: 20px auto;
+  padding: 10px;
+  background-color: #fff;
+  display: flex;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  align-items: center;
+}
+
+.blog-img {
+  width: 100px;
+  height: auto;
+  border-radius: 8px;
+  margin-right: 10px;
+}
+
+.blog-title {
+  font-size: 20px;
+  margin: 20px 0;
+  color: #333;
+}
+
+.blog-status {
+  font-size: 1.2em;
+  margin: 20px 0;
+  margin-left: auto;
+}
+
+.status-button {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.status-button:hover {
+  background-color: #0056b3;
+}
+
+.status {
+  font-weight: bold;
+  margin-left: 10px;
+}
+.blogger-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.bloger {
+  display: flex;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  padding: 10px;
+  box-shadow: 14px 17px 15px -3px rgba(0, 0, 0, 0.1);
+  align-items: center;
+}
+
+.blogger-status-btn {
+  margin-left: auto;
+  margin-right: 10px;
+}
+.blogger-status-btn {
+  background-color: #2ecc71;
+  border: none;
+  outline: 0;
+  border-radius: 5px;
+  color: white;
 }
